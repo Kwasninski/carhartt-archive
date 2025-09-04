@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Items List</title>
+  <style>
+    #edit-modal{
+        display: none;
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border: 1px solid #ccc;
+        padding: 20px;
+        z-index: 1000;
+    }
+    #edit-modal input{
+        display: block;
+        margin: 5px 0;
+    }
+  </style>
+
+
+</head>
+<body>
+  <h1>📋 Items</h1>
+  <ul id="items-list"></ul>
+
+  <h2>Add new item</h2>
+  <form id="add-form">
+    <input type="text" id="type" placeholder="Clothing type" required />
+    <input type="text" id="name" placeholder="Model name" required />
+    <input type="number" id="year" placeholder="Year">
+    <button type="submit">Add</button>
+  </form>
+  
+  <div id = "edit-modal">
+    <h3>Edit item</h3>
+    <input type="text" id="edit-type" placeholder="Clothing type">
+    <input type="text" id="edit-name" placeholder="Model name">
+    <input type="number" id="edit-year" placeholder="Year">
+    <button id="save-edit">Save</button>
+    <button id="cancel-edit">Cancel</button>
+
+  <script>
+    const apiUrl = "http://127.0.0.1:8000/api/items/"; //  ważne, używamy ścieżki z backendu
+    let currentEditId = null;
+
+async function loadItems() {
+      const res = await fetch(apiUrl);
+      const items = await res.json();
+      console.log("items from backend:", items);
+
+      const list = document.getElementById("items-list");
+      list.innerHTML = "";
+
+      for (const item of items) {
+        const li = document.createElement("li");
+        li.textContent = `${item.id}: ${item.type} - ${item.name} - ${item.year}`;
+
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.addEventListener("click", () => showEditModal(item));
+
+        li.appendChild(editBtn);
+        list.appendChild(li);
+      }
+    }
+     
+    //pokaz model edycji
+    function showEditModal(item){
+        currentEditId = item.id;
+        document.getElementById("edit-type").value = item.type;
+        document.getElementById("edit-name").value = item.name;
+        document.getElementById("edit-year").value = item.year;
+        document.getElementById("edit-modal").style.display = "block";
+    }
+
+    //anuluj edycje
+    document.getElementById("cancel-edit").addEventListener("click", () => {
+            document.getElementById("edit-modal").style.display = "none";
+    });
+
+
+    document.getElementById("save-edit").addEventListener("click", async ()=> {
+        const type = document.getElementById("edit-type").value;
+        const name = document.getElementById("edit-name").value;
+        const year = parseInt(document.getElementById("edit-year").value);
+
+        await fetch(apiUrl + currentEditId, {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({name, type, year })
+        })
+
+
+        document.getElementById("edit-modal").style.display = "none";
+        loadItems();
+    });
+
+    //dodawanie nowego przedmiotu
+
+    document.getElementById("add-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const type = document.getElementById("type").value;
+        const name = document.getElementById("name").value;
+        const year = parseInt(document.getElementById("year").value);
+
+
+        await fetch(apiUrl, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({name, type, year })
+        });
+
+        document.getElementById("type").value = "";
+        document.getElementById("name").value = "";
+        document.getElementById("year").value = "";
+        loadItems();
+    });
+
+    loadItems();
+  </script>
+</body>
+</html>
