@@ -1,10 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from databases import Database
 import sqlalchemy
 from models import items, metadata
 from fastapi.staticfiles import StaticFiles
+
 
 
 # database
@@ -17,19 +18,21 @@ metadata.create_all(engine) # tworzy tabele jesli nie istnieje
 app = FastAPI()
 
 # frontend z folderu static
-app.mount("/frontend", StaticFiles(directory="static", html=True), name="static")
+app.mount("/main", StaticFiles(directory="static", html=True), name="static")
 
 # Model danych dla POST (dodawanie nowego przedmiotu)
 class Item(BaseModel):
     type: str
     name: str
-    year: int
+    year: str
+    color: str
 
 # Model danych dla PATCH (aktualizacja istniejącego przedmiotu)
 class ItemUpdate(BaseModel):
     type: str | None = None
     name: str | None = None
-    year: int | None = None
+    year: str | None = None
+    color: str | None = None
 
 
 @app.on_event("startup")
@@ -57,13 +60,13 @@ async def read_item(item_id: int):
     result = await database.fetch_one(query)
     if result:
         return dict(result)
-    return {"error": "item not found"}
+    raise HTTPException(status_code=404, detail="Item not found")
 
 
 # POST - dodaj nowy przedmiot
 @app.post("/api/items/")
 async def create_item(item: Item):
-    query = items.insert().values(type=item.type, name=item.name, year=item.year)
+    query = items.insert().values(type=item.type, name=item.name, year=item.year, color=item.color)
     last_record_id = await database.execute(query)
     return {"item_id": last_record_id, "data": item.dict()}
 
@@ -74,7 +77,7 @@ async def delete_item(item_id: int):
     query = items.select().where(items.c.id == item_id)
     existing = await database.fetch_one(query)
     if not existing:
-        return {"error": "Item not found"}
+        raise HTTPException(status_code=404, detail="Item not found")
     
     query = items.delete().where(items.c.id == item_id)
     await database.execute(query)
@@ -87,7 +90,7 @@ async def update_item(item_id: int, item: ItemUpdate):
     query = items.select().where(items.c.id == item_id)
     existing = await database.fetch_one(query)
     if not existing:
-        return {"error": "item not found"}
+        raise HTTPException(status_code=404, detail="Item not found")
     
     update_data = {}
     if item.type is not None:
@@ -96,6 +99,8 @@ async def update_item(item_id: int, item: ItemUpdate):
         update_data["name"] = item.name
     if item.year is not None:
         update_data["year"] = item.year
+    if item.color is not None:
+        update_data["color"] = item.color
 
     if update_data:
         query = items.update().where(items.c.id == item_id).values(**update_data)

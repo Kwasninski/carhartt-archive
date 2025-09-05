@@ -11,5 +11,6 @@ items = Table(
     Column("id", Integer, primary_key=True),
     Column("type", String),
     Column("name", String),
-    Column("year", Integer),
+    Column("year", String),
+    Column("color", String)
 )

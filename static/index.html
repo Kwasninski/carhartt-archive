@@ -10,38 +10,41 @@
         top: 20%;
         left: 50%;
         transform: translateX(-50%);
-        background: white;
+        background: rgb(255, 255, 255);
         border: 1px solid #ccc;
         padding: 20px;
         z-index: 1000;
     }
     #edit-modal input{
         display: block;
-        margin: 5px 0;
+        margin: 10px 0;
     }
   </style>
 
 
 </head>
 <body>
-  <h1>📋 Items</h1>
+  <h1>📋 Carhartt collection</h1>
   <ul id="items-list"></ul>
 
   <h2>Add new item</h2>
   <form id="add-form">
     <input type="text" id="type" placeholder="Clothing type" required />
-    <input type="text" id="name" placeholder="Model name" required />
-    <input type="number" id="year" placeholder="Year">
+    <input type="text" id="name" placeholder="Model" required />
+    <input type="text" id="year" placeholder="Year">
+    <input type="text" id="color" placeholder="Color">
     <button type="submit">Add</button>
   </form>
   
   <div id = "edit-modal">
     <h3>Edit item</h3>
     <input type="text" id="edit-type" placeholder="Clothing type">
-    <input type="text" id="edit-name" placeholder="Model name">
-    <input type="number" id="edit-year" placeholder="Year">
+    <input type="text" id="edit-name" placeholder="Model">
+    <input type="text" id="edit-year" placeholder="Year">
+    <input type="text" id="edit-color" placeholder="Color">
     <button id="save-edit">Save</button>
     <button id="cancel-edit">Cancel</button>
+
 
   <script>
     const apiUrl = "http://127.0.0.1:8000/api/items/"; //  ważne, używamy ścieżki z backendu
@@ -57,10 +60,11 @@ async function loadItems() {
 
       for (const item of items) {
         const li = document.createElement("li");
-        li.textContent = `${item.id}: ${item.type} - ${item.name} - ${item.year}`;
+        li.textContent = `${item.id}: ${item.type} - ${item.name} - ${item.year} - ${item.color}`;
 
         const editBtn = document.createElement("button");
         editBtn.textContent = "Edit";
+        editBtn.style.marginLeft = "10px"
         editBtn.addEventListener("click", () => showEditModal(item));
 
         li.appendChild(editBtn);
@@ -74,6 +78,7 @@ async function loadItems() {
         document.getElementById("edit-type").value = item.type;
         document.getElementById("edit-name").value = item.name;
         document.getElementById("edit-year").value = item.year;
+        document.getElementById("edit-color").value = item.color;
         document.getElementById("edit-modal").style.display = "block";
     }
 
@@ -86,12 +91,13 @@ async function loadItems() {
     document.getElementById("save-edit").addEventListener("click", async ()=> {
         const type = document.getElementById("edit-type").value;
         const name = document.getElementById("edit-name").value;
-        const year = parseInt(document.getElementById("edit-year").value);
+        const year = document.getElementById("edit-year").value;
+        const color = document.getElementById("edit-color").value;
 
         await fetch(apiUrl + currentEditId, {
             method: "PATCH",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({name, type, year })
+            body: JSON.stringify({name, type, year, color})
         })
 
 
@@ -105,18 +111,20 @@ async function loadItems() {
         e.preventDefault();
         const type = document.getElementById("type").value;
         const name = document.getElementById("name").value;
-        const year = parseInt(document.getElementById("year").value);
+        const year = document.getElementById("year").value;
+        const color = document.getElementById("color").value;
 
 
         await fetch(apiUrl, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({name, type, year })
+            body: JSON.stringify({name, type, year, color })
         });
 
         document.getElementById("type").value = "";
         document.getElementById("name").value = "";
         document.getElementById("year").value = "";
+        document.getAnimations("color").value = "";
         loadItems();
     });
 
