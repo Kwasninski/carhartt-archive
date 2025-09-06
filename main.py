@@ -34,6 +34,12 @@ class ItemUpdate(BaseModel):
     year: str | None = None
     color: str | None = None
 
+class WishlistItem(BaseModel):
+    type: str
+    name: str
+    year: Optional[str] = None
+    color: Optional[str] = None
+
 
 @app.on_event("startup")
 async def startup():
@@ -118,3 +124,9 @@ async def get_wishlist():
     query = wishlist_items.select()
     return await database.fetch_all(query)
 
+#POST - dodaj przedmiot do wishlisty
+@app.post("/api/wishlist")
+async def create_wishlist_item(item: WishlistItem):
+    query = wishlist_items.insert().values(**item.dict())
+    last_id = await database.execute(query)
+    return {"id": last_id, "data": item.dict()}
