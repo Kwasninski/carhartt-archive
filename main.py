@@ -167,7 +167,6 @@ async def delete_wishlist_item(wishlist_item_id:int):
 
 
 # PATCH - zaktualizuj przedmiot z wishlisty
-
 @app.patch("/api/wishlist/{wishlist_item_id}")
 async def update_wishlist_item(wishlist_item_id:int, wishlist_item:WishlistitemUpdate):
     query = wishlist_items.select().where(wishlist_items.c.id == wishlist_item_id)
@@ -175,7 +174,6 @@ async def update_wishlist_item(wishlist_item_id:int, wishlist_item:WishlistitemU
     if not existing:
         raise HTTPException(status_code=404, detail="Item not found")
     
-
     update_wishlist_item_data = {}
     if wishlist_item.type is not None:
         update_wishlist_item_data["type"] = wishlist_item.type
