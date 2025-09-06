@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 from databases import Database
 import sqlalchemy
-from models import items, metadata
+from models import items, metadata, wishlist_items
 from fastapi.staticfiles import StaticFiles
 
 
@@ -110,3 +110,11 @@ async def update_item(item_id: int, item: ItemUpdate):
     updated_item = await database.fetch_one(query)
 
     return {"message": "Item updated", "item_id": item_id, "data": dict(updated_item)}
+
+
+# GET - pobierz wszystko z wishlist
+@app.get("/api/wishlist")
+async def get_wishlist():
+    query = wishlist_items.select()
+    return await database.fetch_all(query)
+

@@ -14,3 +14,13 @@ items = Table(
     Column("year", String),
     Column("color", String)
 )
+
+wishlist_items = Table(
+    "wishlist items",
+    metadata,
+    Column("id", Integer, primary_key=True),
+    Column("type", String),
+    Column("name", String),
+    Column("year", String),
+    Column("color", String)
+)
