@@ -108,16 +108,7 @@ async def update_item(item_id: int, item: ItemUpdate):
     if not existing:
         raise HTTPException(status_code=404, detail="Item not found")
     
-    update_data = {}
-    if item.type is not None:
-        update_data["type"] = item.type
-    if item.name is not None:
-        update_data["name"] = item.name
-    if item.year is not None:
-        update_data["year"] = item.year
-    if item.color is not None:
-        update_data["color"] = item.color
-
+    update_data = item.model_dump(exclude_unset=True)
     if update_data:
         query = items.update().where(items.c.id == item_id).values(**update_data)
         await database.execute(query)
@@ -174,16 +165,7 @@ async def update_wishlist_item(wishlist_item_id:int, wishlist_item:WishlistItemU
     if not existing:
         raise HTTPException(status_code=404, detail="Item not found")
     
-    update_wishlist_item_data = {}
-    if wishlist_item.type is not None:
-        update_wishlist_item_data["type"] = wishlist_item.type
-    if wishlist_item.name is not None:
-        update_wishlist_item_data["name"] = wishlist_item.name
-    if wishlist_item.year is not None:
-        update_wishlist_item_data["year"] = wishlist_item.year
-    if wishlist_item.color is not None:
-        update_wishlist_item_data["color"] = wishlist_item.color
-
+    update_wishlist_item_data = wishlist_item.model_dump(exclude_unset=True)
     if update_wishlist_item_data:
         query = wishlist_items.update().where(wishlist_items.c.id == wishlist_item_id).values(**update_wishlist_item_data)
         await database.execute(query)
