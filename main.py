@@ -50,7 +50,8 @@ async def startup():
 async def shutdown():
     await database.disconnect()
 
-    
+# OWNED ITEMS    
+
 # pobierz wszystkie przedmioty
 @app.get("/api/items/")
 async def get_all_items():
@@ -118,6 +119,8 @@ async def update_item(item_id: int, item: ItemUpdate):
     return {"message": "Item updated", "item_id": item_id, "data": dict(updated_item)}
 
 
+# WISHLIST 
+
 # GET - pobierz wszystko z wishlist
 @app.get("/api/wishlist")
 async def get_wishlist_all():
@@ -139,3 +142,16 @@ async def create_wishlist_item(item: WishlistItem):
     query = wishlist_items.insert().values(**item.model_dump())
     last_id = await database.execute(query)
     return {"id": last_id, "data": item.model_dump()}
+
+
+# DELETE - usun przedmiot z wishlisty
+@app.delete("/api/wishlist/{wishlist_item_id}")
+async def delete_wishlist_item(wishlist_item_id:int):
+    query = wishlist_items.select().where(wishlist_items.c.id == wishlist_item_id)
+    existing = await database.fetch_one(query)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    query = wishlist_items.delete().where(wishlist_items.c.id == wishlist_item_id)
+    await database.execute(query)
+    return {"message": f"item with id {wishlist_item_id} deleted"}
