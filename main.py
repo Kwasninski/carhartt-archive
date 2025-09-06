@@ -124,6 +124,14 @@ async def get_wishlist_all():
     query = wishlist_items.select()
     return await database.fetch_all(query)
 
+#GET - pobierz jeden przedmiot z wishlisty
+@app.get("/api/wishlist/{wishlist_item_id}")
+async def get_wishlist_item(wishlist_item_id:int):
+    query = wishlist_items.select().where(wishlist_items.c.id == wishlist_item_id)
+    result = await database.fetch_one(query)
+    if result:
+        return dict(result)
+    raise HTTPException(status_code=404, detail="Item not found")
 
 #POST - dodaj przedmiot do wishlisty
 @app.post("/api/wishlist")
