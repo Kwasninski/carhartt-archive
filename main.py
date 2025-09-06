@@ -34,11 +34,20 @@ class ItemUpdate(BaseModel):
     year: str | None = None
     color: str | None = None
 
+#model danych dla POST do wishlisty przedmiotow
 class WishlistItem(BaseModel):
     type: str
     name: str
     year: Optional[str] = None
     color: Optional[str] = None
+
+#model danych dla PATCH  wishlisty- aktualizacja przedmiotu z wishlisty
+class WishlistitemUpdate(BaseModel):
+    type: str | None = None
+    name: str | None = None
+    year: str | None = None
+    color: str | None = None
+
 
 
 @app.on_event("startup")
@@ -155,3 +164,33 @@ async def delete_wishlist_item(wishlist_item_id:int):
     query = wishlist_items.delete().where(wishlist_items.c.id == wishlist_item_id)
     await database.execute(query)
     return {"message": f"item with id {wishlist_item_id} deleted"}
+
+
+# PATCH - zaktualizuj przedmiot z wishlisty
+
+@app.patch("/api/wishlist/{wishlist_item_id}")
+async def update_wishlist_item(wishlist_item_id:int, wishlist_item:WishlistitemUpdate):
+    query = wishlist_items.select().where(wishlist_items.c.id == wishlist_item_id)
+    existing = await database.fetch_one(query)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+
+    update_wishlist_item_data = {}
+    if wishlist_item.type is not None:
+        update_wishlist_item_data["type"] = wishlist_item.type
+    if wishlist_item.name is not None:
+        update_wishlist_item_data["name"] = wishlist_item.name
+    if wishlist_item.year is not None:
+        update_wishlist_item_data["year"] = wishlist_item.year
+    if wishlist_item.color is not None:
+        update_wishlist_item_data["color"] = wishlist_item.color
+
+    if update_wishlist_item_data:
+        query = wishlist_items.update().where(wishlist_items.c.id == wishlist_item_id).values(**update_wishlist_item_data)
+        await database.execute(query)
+
+    query = wishlist_items.select().where(wishlist_items.c.id ==wishlist_item_id)
+    updated_item = await database.fetch_one(query)
+
+    return {"message": "Item updated", "item_id": wishlist_item_id, "data": dict(updated_item)}
