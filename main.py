@@ -120,9 +120,10 @@ async def update_item(item_id: int, item: ItemUpdate):
 
 # GET - pobierz wszystko z wishlist
 @app.get("/api/wishlist")
-async def get_wishlist():
+async def get_wishlist_all():
     query = wishlist_items.select()
     return await database.fetch_all(query)
+
 
 #POST - dodaj przedmiot do wishlisty
 @app.post("/api/wishlist")
