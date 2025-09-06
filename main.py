@@ -42,7 +42,7 @@ class WishlistItem(BaseModel):
     color: Optional[str] = None
 
 #model danych dla PATCH  wishlisty- aktualizacja przedmiotu z wishlisty
-class WishlistitemUpdate(BaseModel):
+class WishlistItemUpdate(BaseModel):
     type: str | None = None
     name: str | None = None
     year: str | None = None
@@ -59,7 +59,7 @@ async def startup():
 async def shutdown():
     await database.disconnect()
 
-# OWNED ITEMS    
+# ----- Posiadane przedmioty ------
 
 # pobierz wszystkie przedmioty
 @app.get("/api/items/")
@@ -128,7 +128,7 @@ async def update_item(item_id: int, item: ItemUpdate):
     return {"message": "Item updated", "item_id": item_id, "data": dict(updated_item)}
 
 
-# WISHLIST 
+# ---- WISHLIST ------
 
 # GET - pobierz wszystko z wishlist
 @app.get("/api/wishlist")
@@ -168,7 +168,7 @@ async def delete_wishlist_item(wishlist_item_id:int):
 
 # PATCH - zaktualizuj przedmiot z wishlisty
 @app.patch("/api/wishlist/{wishlist_item_id}")
-async def update_wishlist_item(wishlist_item_id:int, wishlist_item:WishlistitemUpdate):
+async def update_wishlist_item(wishlist_item_id:int, wishlist_item:WishlistItemUpdate):
     query = wishlist_items.select().where(wishlist_items.c.id == wishlist_item_id)
     existing = await database.fetch_one(query)
     if not existing:
