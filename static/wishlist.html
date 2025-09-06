@@ -5,9 +5,32 @@
   <title>About</title>
 </head>
 <body>
-  <h1>ℹ️ About this app</h1>
-  <p>Carhartt wishlist.</p>
-  <p>You can add, edit, and delete items from the database.</p>
+<p>My Carhartt wishlist.</p>
+  <!-- <h1>ℹ️ About this app</h1> -->
+  <ul id="wishlist-list"></ul>
+  <script>
+    const apiUrl = "http://127.0.0.1:8000/api/wishlist/"
+
+    async function loadWishlist(){
+        try {
+            const res = await fetch(apiUrl);
+            const items = await res.json();
+            
+            const list = document.getElementById("wishlist-list");
+            list.innerHTML = "";
+
+            for (const item of items){
+                const li = document.createElement("li");
+                li.textContent = `${item.id}: ${item.type} - ${item.name} - ${item.year} - ${item.color}`;
+                list.appendChild(li);
+            }
+        } catch (error){
+            console.error("Error loading wishlist:", error);
+        }
+    }
+    loadWishlist();
+  </script>
+  <!-- <p>You can add, edit, and delete items from the database.</p> -->
   <a href="/main/index.html">⬅ Back to main</a>
 </body>
 </html>

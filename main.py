@@ -108,6 +108,7 @@ async def update_item(item_id: int, item: ItemUpdate):
     if not existing:
         raise HTTPException(status_code=404, detail="Item not found")
     
+    # aktualizuj tylko przekazane pola
     update_data = item.model_dump(exclude_unset=True)
     if update_data:
         query = items.update().where(items.c.id == item_id).values(**update_data)
@@ -165,6 +166,7 @@ async def update_wishlist_item(wishlist_item_id:int, wishlist_item:WishlistItemU
     if not existing:
         raise HTTPException(status_code=404, detail="Item not found")
     
+    # aktualizuj tylko przekazane pola
     update_wishlist_item_data = wishlist_item.model_dump(exclude_unset=True)
     if update_wishlist_item_data:
         query = wishlist_items.update().where(wishlist_items.c.id == wishlist_item_id).values(**update_wishlist_item_data)
