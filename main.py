@@ -74,7 +74,7 @@ async def read_item(item_id: int):
 async def create_item(item: Item):
     query = items.insert().values(type=item.type, name=item.name, year=item.year, color=item.color)
     last_record_id = await database.execute(query)
-    return {"item_id": last_record_id, "data": item.dict()}
+    return {"item_id": last_record_id, "data": item.model_dump()}
 
 
 # DELETE - usun istnejacy przedmiot
@@ -127,6 +127,6 @@ async def get_wishlist():
 #POST - dodaj przedmiot do wishlisty
 @app.post("/api/wishlist")
 async def create_wishlist_item(item: WishlistItem):
-    query = wishlist_items.insert().values(**item.dict())
+    query = wishlist_items.insert().values(**item.model_dump())
     last_id = await database.execute(query)
-    return {"id": last_id, "data": item.dict()}
+    return {"id": last_id, "data": item.model_dump()}
