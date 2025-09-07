@@ -198,7 +198,7 @@ async def move_wishlist_item_to_items(wishlist_item_id: int):
     )
     await database.execute(insert_query)
 
-    #usun z wishlist_items
+    # usun z wishlist_items
     delete_query = wishlist_items.delete().where(wishlist_items.c.id ==wishlist_item_id)
     await database.execute(delete_query)
 

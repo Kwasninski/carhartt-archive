@@ -48,7 +48,7 @@
 
 
   <script>
-    const apiUrl = "http://127.0.0.1:8000/api/wishlist/"
+    const apiUrl = "http://127.0.0.1:8000/api/wishlist"
     let currentEditId = null;
 
 async function loadWishlistItems() {
@@ -82,8 +82,22 @@ async function loadWishlistItems() {
             }
         });
 
+        // przycisk przenoszenia do archiwum
+        const archiveBtn = document.createElement("button");
+        archiveBtn.textContent = "Move to archive";
+        archiveBtn.style.marginLeft = "10px";
+        archiveBtn.addEventListener("click", async () => {
+            if (confirm(`Move ${wishlist_item.name} to archive?`)){
+                await fetch(`${apiUrl}/${wishlist_item.id}/archive`, {
+                    method: "POST"
+                });
+                loadWishlistItems();
+            }
+        });
+
         li.appendChild(editBtn);
         li.appendChild(deleteBtn);
+        li.appendChild(archiveBtn);
         list.appendChild(li);
       }
     }
