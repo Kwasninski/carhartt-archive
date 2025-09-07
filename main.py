@@ -176,3 +176,31 @@ async def update_wishlist_item(wishlist_item_id:int, wishlist_item:WishlistItemU
     updated_item = await database.fetch_one(query)
 
     return {"message": "Item updated", "item_id": wishlist_item_id, "data": dict(updated_item)}
+
+
+# POST - przenies z wishlisty do archiwum
+
+@app.post("/api/wishlist/{wishlist_item_id}/archive")
+async def move_wishlist_item_to_items(wishlist_item_id: int):
+    # zweryfikuj czy istnieje w wishlist_items
+    query = wishlist_items.select().where(wishlist_items.c.id == wishlist_item_id)
+    wishlist_item = await database.fetch_one(query)
+
+    if not wishlist_item:
+        raise HTTPException(status_code=404, detail="Wishlist item not found")
+    
+    # przenies do items
+    insert_query = items.insert().values(
+        type=wishlist_item["type"],
+        name=wishlist_item["name"],
+        year=wishlist_item["year"],
+        color=wishlist_item["color"],
+    )
+    await database.execute(insert_query)
+
+    #usun z wishlist_items
+    delete_query = wishlist_items.delete().where(wishlist_items.c.id ==wishlist_item_id)
+    await database.execute(delete_query)
+
+    return {"message": f"Wishlist item {wishlist_item_id} moved to archive."}
+    
