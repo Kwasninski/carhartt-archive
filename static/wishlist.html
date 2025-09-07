@@ -3,34 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <title>About</title>
+    <style>
+    #edit-modal{
+        display: none;
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgb(255, 255, 255);
+        border: 1px solid #ccc;
+        padding: 20px;
+        z-index: 1000;
+    }
+    #edit-modal input{
+        display: block;
+        margin: 10px 0;
+    }
+  </style>
 </head>
 <body>
 <p>My Carhartt wishlist.</p>
+
   <!-- <h1>ℹ️ About this app</h1> -->
   <ul id="wishlist-list"></ul>
+    <h2>Add new item</h2>
+  <form id="add-form">
+    <input type="text" id="type" placeholder="Clothing type" required />
+    <input type="text" id="name" placeholder="Model" required />
+    <input type="text" id="year" placeholder="Year">
+    <input type="text" id="color" placeholder="Color">
+    <button type="submit">Add</button>
+  </form>
+
+
+    <div id = "edit-modal">
+    <h3>Edit item</h3>
+    <input type="text" id="edit-type" placeholder="Clothing type">
+    <input type="text" id="edit-name" placeholder="Model">
+    <input type="text" id="edit-year" placeholder="Year">
+    <input type="text" id="edit-color" placeholder="Color">
+    <button id="save-edit">Save</button>
+    <button id="cancel-edit">Cancel</button>
+
+
   <script>
     const apiUrl = "http://127.0.0.1:8000/api/wishlist/"
+    let currentEditId = null;
 
-    async function loadWishlist(){
-        try {
-            const res = await fetch(apiUrl);
-            const items = await res.json();
-            
-            const list = document.getElementById("wishlist-list");
-            list.innerHTML = "";
+async function loadWishlistItems() {
+      const res = await fetch(apiUrl);
+      const wishlist_items = await res.json();
+      console.log("items from backend:", wishlist_items);
 
-            for (const item of items){
-                const li = document.createElement("li");
-                li.textContent = `${item.id}: ${item.type} - ${item.name} - ${item.year} - ${item.color}`;
-                list.appendChild(li);
+      const list = document.getElementById("wishlist-list");
+      list.innerHTML = "";
+
+      for (const wishlist_item of wishlist_items) {
+        const li = document.createElement("li");
+        li.textContent = `${wishlist_item.id}: ${wishlist_item.type} - ${wishlist_item.name} - ${wishlist_item.year} - ${wishlist_item.color}`;
+
+        // przycisk edycji
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.style.marginLeft = "10px";
+        editBtn.addEventListener("click", () => showEditModal(wishlist_item));
+
+        // przycisk usuwania
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.style.marginLeft = "10px";
+        deleteBtn.addEventListener("click", async () => {
+            if (confirm(`Are you sure you want to delete ${wishlist_item.name} ${wishlist_item.color} ${wishlist_item.year}?`)){
+                await fetch(apiUrl + wishlist_item.id, {
+                    method: "DELETE"
+                });
+                loadWishlistItems();
             }
-        } catch (error){
-            console.error("Error loading wishlist:", error);
-        }
+        });
+
+        li.appendChild(editBtn);
+        li.appendChild(deleteBtn);
+        list.appendChild(li);
+      }
     }
-    loadWishlist();
+     
+    //pokaz model edycji
+    function showEditModal(item){
+        currentEditId = item.id;
+        document.getElementById("edit-type").value = item.type;
+        document.getElementById("edit-name").value = item.name;
+        document.getElementById("edit-year").value = item.year;
+        document.getElementById("edit-color").value = item.color;
+        document.getElementById("edit-modal").style.display = "block";
+    }
+
+    //anuluj edycje
+    document.getElementById("cancel-edit").addEventListener("click", () => {
+            document.getElementById("edit-modal").style.display = "none";
+    });
+
+    // zapisz edycje
+    document.getElementById("save-edit").addEventListener("click", async ()=> {
+        const type = document.getElementById("edit-type").value;
+        const name = document.getElementById("edit-name").value;
+        const year = document.getElementById("edit-year").value;
+        const color = document.getElementById("edit-color").value;
+
+        await fetch(apiUrl + currentEditId, {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({name, type, year, color})
+        })
+
+        document.getElementById("edit-modal").style.display = "none";
+        loadWishlistItems();
+    });
+
+    //dodawanie nowego przedmiotu
+
+    document.getElementById("add-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const type = document.getElementById("type").value;
+        const name = document.getElementById("name").value;
+        const year = document.getElementById("year").value;
+        const color = document.getElementById("color").value;
+
+
+        await fetch(apiUrl, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({name, type, year, color })
+        });
+
+        document.getElementById("type").value = "";
+        document.getElementById("name").value = "";
+        document.getElementById("year").value = "";
+        document.getElementById("color").value = "";
+        loadWishlistItems();
+    });
+
+    loadWishlistItems();
   </script>
-  <!-- <p>You can add, edit, and delete items from the database.</p> -->
-  <a href="/main/index.html">⬅ Back to main</a>
 </body>
 </html>
