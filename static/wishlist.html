@@ -22,11 +22,10 @@
   </style>
 </head>
 <body>
-<a href="index.html"> ⬅Go to archive</a>
 <h1>🧞My Carhartt Wishlist</h1>
-
   <!-- <h1>ℹ️ About this app</h1> -->
   <ul id="wishlist-list"></ul>
+<a href="index.html"> ⬅Go to archive</a>
     <h2>Add new wishlist item</h2>
   <form id="add-form">
     <input type="text" id="type" placeholder="Clothing type" required />
@@ -48,7 +47,7 @@
 
 
   <script>
-    const apiUrl = "http://127.0.0.1:8000/api/wishlist"
+    const apiUrl = "http://127.0.0.1:8000/api/wishlist/"
     let currentEditId = null;
 
 async function loadWishlistItems() {
@@ -127,7 +126,7 @@ async function loadWishlistItems() {
         await fetch(apiUrl + currentEditId, {
             method: "PATCH",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({name, type, year, color})
+            body: JSON.stringify({type, name, year, color})
         })
 
         document.getElementById("edit-modal").style.display = "none";
@@ -147,7 +146,7 @@ async function loadWishlistItems() {
         await fetch(apiUrl, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({name, type, year, color })
+            body: JSON.stringify({type, name, year, color })
         });
 
         document.getElementById("type").value = "";
