@@ -10,4 +10,4 @@ database: sqlite3
 
 fronted: html, css, js
 
-type: "uvicorn main:app --reload" in terminal to run locally to run locally
+type: "uvicorn main:app --reload" in terminal to run locally
