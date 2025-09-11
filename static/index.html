@@ -20,8 +20,6 @@
         margin: 10px 0;
     }
   </style>
-
-
 </head>
 <body>
   <h1>📋 My Carhartt Archive</h1>
@@ -37,7 +35,7 @@
   </form>
   
   <div id = "edit-modal">
-    <h3>Edit item</h3>
+    <h3 id="edit-title">Edit item</h3>
     <input type="text" id="edit-type" placeholder="Clothing type">
     <input type="text" id="edit-name" placeholder="Model">
     <input type="text" id="edit-year" placeholder="Year">
@@ -90,6 +88,7 @@ async function loadItems() {
     //pokaz model edycji
     function showEditModal(item){
         currentEditId = item.id;
+        document.getElementById("edit-title").textContent = `Edit ${item.name} ${item.color} ${item.type}`
         document.getElementById("edit-type").value = item.type;
         document.getElementById("edit-name").value = item.name;
         document.getElementById("edit-year").value = item.year;
