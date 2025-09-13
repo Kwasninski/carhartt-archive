@@ -9,5 +9,3 @@ backend: python, fastapi
 database: sqlite3
 
 fronted: html, css, js
-
-type: "uvicorn main:app --reload" in terminal to run locally
